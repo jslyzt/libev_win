@@ -1,0 +1,5 @@
+/.vs/
+/x64/
+/libev/x64/
+*.vcxproj.user
+
