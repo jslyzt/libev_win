@@ -97,79 +97,74 @@
 
 /* mostly directly taken from the kernel or documentation */
 
-struct io_uring_sqe
-{
-  __u8 opcode;
-  __u8 flags;
-  __u16 ioprio;
-  __s32 fd;
-  union {
-    __u64 off;
-    __u64 addr2;
-  };
-  __u64 addr;
-  __u32 len;
-  union {
-    __kernel_rwf_t rw_flags;
-    __u32 fsync_flags;
-    __u16 poll_events;
-    __u32 sync_range_flags;
-    __u32 msg_flags;
-    __u32 timeout_flags;
-    __u32 accept_flags;
-    __u32 cancel_flags;
-    __u32 open_flags;
-    __u32 statx_flags;
-  };
-  __u64 user_data;
-  union {
-    __u16 buf_index;
-    __u64 __pad2[3];
-  };
+struct io_uring_sqe {
+    __u8 opcode;
+    __u8 flags;
+    __u16 ioprio;
+    __s32 fd;
+    union {
+        __u64 off;
+        __u64 addr2;
+    };
+    __u64 addr;
+    __u32 len;
+    union {
+        __kernel_rwf_t rw_flags;
+        __u32 fsync_flags;
+        __u16 poll_events;
+        __u32 sync_range_flags;
+        __u32 msg_flags;
+        __u32 timeout_flags;
+        __u32 accept_flags;
+        __u32 cancel_flags;
+        __u32 open_flags;
+        __u32 statx_flags;
+    };
+    __u64 user_data;
+    union {
+        __u16 buf_index;
+        __u64 __pad2[3];
+    };
 };
 
-struct io_uring_cqe
-{
-  __u64 user_data;
-  __s32 res;
-  __u32 flags;
+struct io_uring_cqe {
+    __u64 user_data;
+    __s32 res;
+    __u32 flags;
 };
 
-struct io_sqring_offsets
-{
-  __u32 head;
-  __u32 tail;
-  __u32 ring_mask;
-  __u32 ring_entries;
-  __u32 flags;
-  __u32 dropped;
-  __u32 array;
-  __u32 resv1;
-  __u64 resv2;
+struct io_sqring_offsets {
+    __u32 head;
+    __u32 tail;
+    __u32 ring_mask;
+    __u32 ring_entries;
+    __u32 flags;
+    __u32 dropped;
+    __u32 array;
+    __u32 resv1;
+    __u64 resv2;
 };
 
-struct io_cqring_offsets
-{
-  __u32 head;
-  __u32 tail;
-  __u32 ring_mask;
-  __u32 ring_entries;
-  __u32 overflow;
-  __u32 cqes;
-  __u64 resv[2];
+struct io_cqring_offsets {
+    __u32 head;
+    __u32 tail;
+    __u32 ring_mask;
+    __u32 ring_entries;
+    __u32 overflow;
+    __u32 cqes;
+    __u64 resv[2];
 };
 
-struct io_uring_params
-{
-  __u32 sq_entries;
-  __u32 cq_entries;
-  __u32 flags;
-  __u32 sq_thread_cpu;
-  __u32 sq_thread_idle;
-  __u32 features;
-  __u32 resv[4];
-  struct io_sqring_offsets sq_off;
-  struct io_cqring_offsets cq_off;
+struct io_uring_params {
+    __u32 sq_entries;
+    __u32 cq_entries;
+    __u32 flags;
+    __u32 sq_thread_cpu;
+    __u32 sq_thread_idle;
+    __u32 features;
+    __u32 resv[4];
+    struct io_sqring_offsets sq_off;
+    struct io_cqring_offsets cq_off;
 };
 
 #define IORING_SETUP_CQSIZE 0x00000008
@@ -180,10 +175,9 @@ struct io_uring_params
 #define IORING_OP_TIMEOUT_REMOVE 12
 
 /* relative or absolute, reference clock is CLOCK_MONOTONIC */
-struct iouring_kernel_timespec
-{
-  int64_t tv_sec;
-  long long tv_nsec;
+struct iouring_kernel_timespec {
+    int64_t tv_sec;
+    long long tv_nsec;
 };
 
 #define IORING_TIMEOUT_ABS 0x00000001
@@ -200,16 +194,14 @@ struct iouring_kernel_timespec
 
 inline_size
 int
-evsys_io_uring_setup (unsigned entries, struct io_uring_params *params)
-{
-  return ev_syscall2 (SYS_io_uring_setup, entries, params);
+evsys_io_uring_setup(unsigned entries, struct io_uring_params* params) {
+    return ev_syscall2(SYS_io_uring_setup, entries, params);
 }
 
 inline_size
 int
-evsys_io_uring_enter (int fd, unsigned to_submit, unsigned min_complete, unsigned flags, const sigset_t *sig, size_t sigsz)
-{
-  return ev_syscall6 (SYS_io_uring_enter, fd, to_submit, min_complete, flags, sig, sigsz);
+evsys_io_uring_enter(int fd, unsigned to_submit, unsigned min_complete, unsigned flags, const sigset_t* sig, size_t sigsz) {
+    return ev_syscall6(SYS_io_uring_enter, fd, to_submit, min_complete, flags, sig, sigsz);
 }
 
 /*****************************************************************************/
@@ -228,75 +220,73 @@ evsys_io_uring_enter (int fd, unsigned to_submit, unsigned min_complete, unsigne
 
 inline_speed
 int
-iouring_enter (EV_P_ ev_tstamp timeout)
-{
-  int res;
+iouring_enter(EV_P_ ev_tstamp timeout) {
+    int res;
 
-  EV_RELEASE_CB;
+    EV_RELEASE_CB;
 
-  res = evsys_io_uring_enter (iouring_fd, iouring_to_submit, 1,
-                              timeout > EV_TS_CONST (0.) ? IORING_ENTER_GETEVENTS : 0, 0, 0);
+    res = evsys_io_uring_enter(iouring_fd, iouring_to_submit, 1,
+                               timeout > EV_TS_CONST(0.) ? IORING_ENTER_GETEVENTS : 0, 0, 0);
 
-  assert (("libev: io_uring_enter did not consume all sqes", (res < 0 || res == iouring_to_submit)));
+    assert(("libev: io_uring_enter did not consume all sqes", (res < 0 || res == iouring_to_submit)));
 
-  iouring_to_submit = 0;
+    iouring_to_submit = 0;
 
-  EV_ACQUIRE_CB;
+    EV_ACQUIRE_CB;
 
-  return res;
+    return res;
 }
 
 /* TODO: can we move things around so we don't need this forward-reference? */
 static void
-iouring_poll (EV_P_ ev_tstamp timeout);
+iouring_poll(EV_P_ ev_tstamp timeout);
 
 static
-struct io_uring_sqe *
-iouring_sqe_get (EV_P)
-{
-  unsigned tail;
-  
-  for (;;)
-    {
-      tail = EV_SQ_VAR (tail);
+struct io_uring_sqe*
+iouring_sqe_get(EV_P) {
+    unsigned tail;
 
-      if (ecb_expect_true (tail + 1 - EV_SQ_VAR (head) <= EV_SQ_VAR (ring_entries)))
-        break; /* whats the problem, we have free sqes */
+    for (;;) {
+        tail = EV_SQ_VAR(tail);
 
-      /* queue full, need to flush and possibly handle some events */
+        if (ecb_expect_true(tail + 1 - EV_SQ_VAR(head) <= EV_SQ_VAR(ring_entries))) {
+            break;    /* whats the problem, we have free sqes */
+        }
+
+        /* queue full, need to flush and possibly handle some events */
 
 #if EV_FEATURE_CODE
-      /* first we ask the kernel nicely, most often this frees up some sqes */
-      int res = iouring_enter (EV_A_ EV_TS_CONST (0.));
+        /* first we ask the kernel nicely, most often this frees up some sqes */
+        int res = iouring_enter(EV_A_ EV_TS_CONST(0.));
 
-      ECB_MEMORY_FENCE_ACQUIRE; /* better safe than sorry */
+        ECB_MEMORY_FENCE_ACQUIRE; /* better safe than sorry */
 
-      if (res >= 0)
-        continue; /* yes, it worked, try again */
+        if (res >= 0) {
+            continue;    /* yes, it worked, try again */
+        }
 #endif
 
-      /* some problem, possibly EBUSY - do the full poll and let it handle any issues */
+        /* some problem, possibly EBUSY - do the full poll and let it handle any issues */
 
-      iouring_poll (EV_A_ EV_TS_CONST (0.));
-      /* iouring_poll should have done ECB_MEMORY_FENCE_ACQUIRE for us */
+        iouring_poll(EV_A_ EV_TS_CONST(0.));
+        /* iouring_poll should have done ECB_MEMORY_FENCE_ACQUIRE for us */
     }
 
-  /*assert (("libev: io_uring queue full after flush", tail + 1 - EV_SQ_VAR (head) <= EV_SQ_VAR (ring_entries)));*/
+    /*assert (("libev: io_uring queue full after flush", tail + 1 - EV_SQ_VAR (head) <= EV_SQ_VAR (ring_entries)));*/
 
-  return EV_SQES + (tail & EV_SQ_VAR (ring_mask));
+    return EV_SQES + (tail & EV_SQ_VAR(ring_mask));
 }
 
 inline_size
-struct io_uring_sqe *
-iouring_sqe_submit (EV_P_ struct io_uring_sqe *sqe)
-{
-  unsigned idx = sqe - EV_SQES;
+struct io_uring_sqe*
+iouring_sqe_submit(EV_P_ struct io_uring_sqe* sqe) {
+    unsigned idx = sqe - EV_SQES;
 
-  EV_SQ_ARRAY [idx] = idx;
-  ECB_MEMORY_FENCE_RELEASE;
-  ++EV_SQ_VAR (tail);
-  /*ECB_MEMORY_FENCE_RELEASE; /* for the time being we assume this is not needed */
-  ++iouring_to_submit;
+    EV_SQ_ARRAY [idx] = idx;
+    ECB_MEMORY_FENCE_RELEASE;
+    ++EV_SQ_VAR(tail);
+    /*ECB_MEMORY_FENCE_RELEASE; /* for the time being we assume this is not needed */
+    ++iouring_to_submit;
 }
 
 /*****************************************************************************/
@@ -306,389 +296,377 @@ iouring_sqe_submit (EV_P_ struct io_uring_sqe *sqe)
  * the next iteration should re-set it.
  */
 static void
-iouring_tfd_cb (EV_P_ struct ev_io *w, int revents)
-{
-  iouring_tfd_to = EV_TSTAMP_HUGE;
+iouring_tfd_cb(EV_P_ struct ev_io* w, int revents) {
+    iouring_tfd_to = EV_TSTAMP_HUGE;
 }
 
 /* called for full and partial cleanup */
 ecb_cold
 static int
-iouring_internal_destroy (EV_P)
-{
-  close (iouring_tfd);
-  close (iouring_fd);
+iouring_internal_destroy(EV_P) {
+    close(iouring_tfd);
+    close(iouring_fd);
 
-  if (iouring_sq_ring != MAP_FAILED) munmap (iouring_sq_ring, iouring_sq_ring_size);
-  if (iouring_cq_ring != MAP_FAILED) munmap (iouring_cq_ring, iouring_cq_ring_size);
-  if (iouring_sqes    != MAP_FAILED) munmap (iouring_sqes   , iouring_sqes_size   );
+    if (iouring_sq_ring != MAP_FAILED) { munmap(iouring_sq_ring, iouring_sq_ring_size); }
+    if (iouring_cq_ring != MAP_FAILED) { munmap(iouring_cq_ring, iouring_cq_ring_size); }
+    if (iouring_sqes    != MAP_FAILED) { munmap(iouring_sqes, iouring_sqes_size); }
 
-  if (ev_is_active (&iouring_tfd_w))
-    {
-      ev_ref (EV_A);
-      ev_io_stop (EV_A_ &iouring_tfd_w);
+    if (ev_is_active(&iouring_tfd_w)) {
+        ev_ref(EV_A);
+        ev_io_stop(EV_A_ & iouring_tfd_w);
     }
 }
 
 ecb_cold
 static int
-iouring_internal_init (EV_P)
-{
-  struct io_uring_params params = { 0 };
+iouring_internal_init(EV_P) {
+    struct io_uring_params params = { 0 };
 
-  iouring_to_submit = 0;
+    iouring_to_submit = 0;
 
-  iouring_tfd     = -1;
-  iouring_sq_ring = MAP_FAILED;
-  iouring_cq_ring = MAP_FAILED;
-  iouring_sqes    = MAP_FAILED;
+    iouring_tfd     = -1;
+    iouring_sq_ring = MAP_FAILED;
+    iouring_cq_ring = MAP_FAILED;
+    iouring_sqes    = MAP_FAILED;
 
-  if (!have_monotonic) /* cannot really happen, but what if11 */
-    return -1;
-
-  for (;;)
-    {
-      iouring_fd = evsys_io_uring_setup (iouring_entries, &params);
-
-      if (iouring_fd >= 0)
-        break; /* yippie */
-
-      if (errno != EINVAL)
-        return -1; /* we failed */
-
-#if TODO
-      if ((~params.features) & (IORING_FEAT_NODROP | IORING_FEATURE_SINGLE_MMAP | IORING_FEAT_SUBMIT_STABLE))
-        return -1; /* we require the above features */
-#endif
-
-      /* EINVAL: lots of possible reasons, but maybe
-       * it is because we hit the unqueryable hardcoded size limit
-       */
-
-      /* we hit the limit already, give up */
-      if (iouring_max_entries)
+    if (!have_monotonic) { /* cannot really happen, but what if11 */
         return -1;
-
-      /* first time we hit EINVAL? assume we hit the limit, so go back and retry */
-      iouring_entries >>= 1;
-      iouring_max_entries = iouring_entries;
     }
 
-  iouring_sq_ring_size = params.sq_off.array + params.sq_entries * sizeof (unsigned);
-  iouring_cq_ring_size = params.cq_off.cqes  + params.cq_entries * sizeof (struct io_uring_cqe);
-  iouring_sqes_size    =                       params.sq_entries * sizeof (struct io_uring_sqe);
+    for (;;) {
+        iouring_fd = evsys_io_uring_setup(iouring_entries, &params);
 
-  iouring_sq_ring = mmap (0, iouring_sq_ring_size, PROT_READ | PROT_WRITE,
-                          MAP_SHARED | MAP_POPULATE, iouring_fd, IORING_OFF_SQ_RING);
-  iouring_cq_ring = mmap (0, iouring_cq_ring_size, PROT_READ | PROT_WRITE,
-                          MAP_SHARED | MAP_POPULATE, iouring_fd, IORING_OFF_CQ_RING);
-  iouring_sqes    = mmap (0, iouring_sqes_size, PROT_READ | PROT_WRITE,
-                          MAP_SHARED | MAP_POPULATE, iouring_fd, IORING_OFF_SQES);
+        if (iouring_fd >= 0) {
+            break;    /* yippie */
+        }
 
-  if (iouring_sq_ring == MAP_FAILED || iouring_cq_ring == MAP_FAILED || iouring_sqes == MAP_FAILED)
-    return -1;
+        if (errno != EINVAL) {
+            return -1;    /* we failed */
+        }
 
-  iouring_sq_head         = params.sq_off.head;
-  iouring_sq_tail         = params.sq_off.tail;
-  iouring_sq_ring_mask    = params.sq_off.ring_mask;
-  iouring_sq_ring_entries = params.sq_off.ring_entries;
-  iouring_sq_flags        = params.sq_off.flags;
-  iouring_sq_dropped      = params.sq_off.dropped;
-  iouring_sq_array        = params.sq_off.array;
+#if TODO
+        if ((~params.features) & (IORING_FEAT_NODROP | IORING_FEATURE_SINGLE_MMAP | IORING_FEAT_SUBMIT_STABLE)) {
+            return -1;    /* we require the above features */
+        }
+#endif
 
-  iouring_cq_head         = params.cq_off.head;
-  iouring_cq_tail         = params.cq_off.tail;
-  iouring_cq_ring_mask    = params.cq_off.ring_mask;
-  iouring_cq_ring_entries = params.cq_off.ring_entries;
-  iouring_cq_overflow     = params.cq_off.overflow;
-  iouring_cq_cqes         = params.cq_off.cqes;
+        /* EINVAL: lots of possible reasons, but maybe
+         * it is because we hit the unqueryable hardcoded size limit
+         */
 
-  iouring_tfd = timerfd_create (CLOCK_MONOTONIC, TFD_CLOEXEC);
+        /* we hit the limit already, give up */
+        if (iouring_max_entries) {
+            return -1;
+        }
 
-  if (iouring_tfd < 0)
-    return iouring_tfd;
+        /* first time we hit EINVAL? assume we hit the limit, so go back and retry */
+        iouring_entries >>= 1;
+        iouring_max_entries = iouring_entries;
+    }
 
-  iouring_tfd_to = EV_TSTAMP_HUGE;
+    iouring_sq_ring_size = params.sq_off.array + params.sq_entries * sizeof(unsigned);
+    iouring_cq_ring_size = params.cq_off.cqes  + params.cq_entries * sizeof(struct io_uring_cqe);
+    iouring_sqes_size    =                       params.sq_entries * sizeof(struct io_uring_sqe);
 
-  return 0;
+    iouring_sq_ring = mmap(0, iouring_sq_ring_size, PROT_READ | PROT_WRITE,
+                           MAP_SHARED | MAP_POPULATE, iouring_fd, IORING_OFF_SQ_RING);
+    iouring_cq_ring = mmap(0, iouring_cq_ring_size, PROT_READ | PROT_WRITE,
+                           MAP_SHARED | MAP_POPULATE, iouring_fd, IORING_OFF_CQ_RING);
+    iouring_sqes    = mmap(0, iouring_sqes_size, PROT_READ | PROT_WRITE,
+                           MAP_SHARED | MAP_POPULATE, iouring_fd, IORING_OFF_SQES);
+
+    if (iouring_sq_ring == MAP_FAILED || iouring_cq_ring == MAP_FAILED || iouring_sqes == MAP_FAILED) {
+        return -1;
+    }
+
+    iouring_sq_head         = params.sq_off.head;
+    iouring_sq_tail         = params.sq_off.tail;
+    iouring_sq_ring_mask    = params.sq_off.ring_mask;
+    iouring_sq_ring_entries = params.sq_off.ring_entries;
+    iouring_sq_flags        = params.sq_off.flags;
+    iouring_sq_dropped      = params.sq_off.dropped;
+    iouring_sq_array        = params.sq_off.array;
+
+    iouring_cq_head         = params.cq_off.head;
+    iouring_cq_tail         = params.cq_off.tail;
+    iouring_cq_ring_mask    = params.cq_off.ring_mask;
+    iouring_cq_ring_entries = params.cq_off.ring_entries;
+    iouring_cq_overflow     = params.cq_off.overflow;
+    iouring_cq_cqes         = params.cq_off.cqes;
+
+    iouring_tfd = timerfd_create(CLOCK_MONOTONIC, TFD_CLOEXEC);
+
+    if (iouring_tfd < 0) {
+        return iouring_tfd;
+    }
+
+    iouring_tfd_to = EV_TSTAMP_HUGE;
+
+    return 0;
 }
 
 ecb_cold
 static void
-iouring_fork (EV_P)
-{
-  iouring_internal_destroy (EV_A);
+iouring_fork(EV_P) {
+    iouring_internal_destroy(EV_A);
 
-  while (iouring_internal_init (EV_A) < 0)
-    ev_syserr ("(libev) io_uring_setup");
+    while (iouring_internal_init(EV_A) < 0) {
+        ev_syserr("(libev) io_uring_setup");
+    }
 
-  fd_rearm_all (EV_A);
+    fd_rearm_all(EV_A);
 
-  ev_io_stop  (EV_A_ &iouring_tfd_w);
-  ev_io_set   (EV_A_ &iouring_tfd_w, iouring_tfd, EV_READ);
-  ev_io_start (EV_A_ &iouring_tfd_w);
+    ev_io_stop(EV_A_ & iouring_tfd_w);
+    ev_io_set(EV_A_ & iouring_tfd_w, iouring_tfd, EV_READ);
+    ev_io_start(EV_A_ & iouring_tfd_w);
 }
 
 /*****************************************************************************/
 
 static void
-iouring_modify (EV_P_ int fd, int oev, int nev)
-{
-  if (oev)
-    {
-      /* we assume the sqe's are all "properly" initialised */
-      struct io_uring_sqe *sqe = iouring_sqe_get (EV_A);
-      sqe->opcode    = IORING_OP_POLL_REMOVE;
-      sqe->fd        = fd;
-      /* Jens Axboe notified me that user_data is not what is documented, but is
-       * some kind of unique ID that has to match, otherwise the request cannot
-       * be removed. Since we don't *really* have that, we pass in the old
-       * generation counter - if that fails, too bad, it will hopefully be removed
-       * at close time and then be ignored. */
-      sqe->addr      = (uint32_t)fd | ((__u64)(uint32_t)anfds [fd].egen << 32);
-      sqe->user_data = (uint64_t)-1;
-      iouring_sqe_submit (EV_A_ sqe);
+iouring_modify(EV_P_ int fd, int oev, int nev) {
+    if (oev) {
+        /* we assume the sqe's are all "properly" initialised */
+        struct io_uring_sqe* sqe = iouring_sqe_get(EV_A);
+        sqe->opcode    = IORING_OP_POLL_REMOVE;
+        sqe->fd        = fd;
+        /* Jens Axboe notified me that user_data is not what is documented, but is
+         * some kind of unique ID that has to match, otherwise the request cannot
+         * be removed. Since we don't *really* have that, we pass in the old
+         * generation counter - if that fails, too bad, it will hopefully be removed
+         * at close time and then be ignored. */
+        sqe->addr      = (uint32_t)fd | ((__u64)(uint32_t)anfds [fd].egen << 32);
+        sqe->user_data = (uint64_t) -1;
+        iouring_sqe_submit(EV_A_ sqe);
 
-      /* increment generation counter to avoid handling old events */
-      ++anfds [fd].egen;
+        /* increment generation counter to avoid handling old events */
+        ++anfds [fd].egen;
     }
 
-  if (nev)
-    {
-      struct io_uring_sqe *sqe = iouring_sqe_get (EV_A);
-      sqe->opcode      = IORING_OP_POLL_ADD;
-      sqe->fd          = fd;
-      sqe->addr        = 0;
-      sqe->user_data   = (uint32_t)fd | ((__u64)(uint32_t)anfds [fd].egen << 32);
-      sqe->poll_events =
-        (nev & EV_READ ? POLLIN : 0)
-        | (nev & EV_WRITE ? POLLOUT : 0);
-      iouring_sqe_submit (EV_A_ sqe);
+    if (nev) {
+        struct io_uring_sqe* sqe = iouring_sqe_get(EV_A);
+        sqe->opcode      = IORING_OP_POLL_ADD;
+        sqe->fd          = fd;
+        sqe->addr        = 0;
+        sqe->user_data   = (uint32_t)fd | ((__u64)(uint32_t)anfds [fd].egen << 32);
+        sqe->poll_events =
+            (nev & EV_READ ? POLLIN : 0)
+            | (nev & EV_WRITE ? POLLOUT : 0);
+        iouring_sqe_submit(EV_A_ sqe);
     }
 }
 
 inline_size
 void
-iouring_tfd_update (EV_P_ ev_tstamp timeout)
-{
-  ev_tstamp tfd_to = mn_now + timeout;
+iouring_tfd_update(EV_P_ ev_tstamp timeout) {
+    ev_tstamp tfd_to = mn_now + timeout;
 
-  /* we assume there will be many iterations per timer change, so
-   * we only re-set the timerfd when we have to because its expiry
-   * is too late.
-   */
-  if (ecb_expect_false (tfd_to < iouring_tfd_to))
-    {
-       struct itimerspec its;
+    /* we assume there will be many iterations per timer change, so
+     * we only re-set the timerfd when we have to because its expiry
+     * is too late.
+     */
+    if (ecb_expect_false(tfd_to < iouring_tfd_to)) {
+        struct itimerspec its;
 
-       iouring_tfd_to = tfd_to;
-       EV_TS_SET (its.it_interval, 0.);
-       EV_TS_SET (its.it_value, tfd_to);
+        iouring_tfd_to = tfd_to;
+        EV_TS_SET(its.it_interval, 0.);
+        EV_TS_SET(its.it_value, tfd_to);
 
-       if (timerfd_settime (iouring_tfd, TFD_TIMER_ABSTIME, &its, 0) < 0)
-         assert (("libev: iouring timerfd_settime failed", 0));
+        if (timerfd_settime(iouring_tfd, TFD_TIMER_ABSTIME, &its, 0) < 0) {
+            assert(("libev: iouring timerfd_settime failed", 0));
+        }
     }
 }
 
 inline_size
 void
-iouring_process_cqe (EV_P_ struct io_uring_cqe *cqe)
-{
-  int      fd  = cqe->user_data & 0xffffffffU;
-  uint32_t gen = cqe->user_data >> 32;
-  int      res = cqe->res;
+iouring_process_cqe(EV_P_ struct io_uring_cqe* cqe) {
+    int      fd  = cqe->user_data & 0xffffffffU;
+    uint32_t gen = cqe->user_data >> 32;
+    int      res = cqe->res;
 
-  /* user_data -1 is a remove that we are not atm. interested in */
-  if (cqe->user_data == (uint64_t)-1)
-    return;
-
-  assert (("libev: io_uring fd must be in-bounds", fd >= 0 && fd < anfdmax));
-
-  /* documentation lies, of course. the result value is NOT like
-   * normal syscalls, but like linux raw syscalls, i.e. negative
-   * error numbers. fortunate, as otherwise there would be no way
-   * to get error codes at all. still, why not document this?
-   */
-
-  /* ignore event if generation doesn't match */
-  /* other than skipping removal events, */
-  /* this should actually be very rare */
-  if (ecb_expect_false (gen != (uint32_t)anfds [fd].egen))
-    return;
-
-  if (ecb_expect_false (res < 0))
-    {
-      /*TODO: EINVAL handling (was something failed with this fd)*/
-
-      if (res == -EBADF)
-        {
-          assert (("libev: event loop rejected bad fd", res != -EBADF));
-          fd_kill (EV_A_ fd);
-        }
-      else
-        {
-          errno = -res;
-          ev_syserr ("(libev) IORING_OP_POLL_ADD");
-        }
-
-      return;
+    /* user_data -1 is a remove that we are not atm. interested in */
+    if (cqe->user_data == (uint64_t) -1) {
+        return;
     }
 
-  /* feed events, we do not expect or handle POLLNVAL */
-  fd_event (
-    EV_A_
-    fd,
-    (res & (POLLOUT | POLLERR | POLLHUP) ? EV_WRITE : 0)
-    | (res & (POLLIN | POLLERR | POLLHUP) ? EV_READ : 0)
-  );
+    assert(("libev: io_uring fd must be in-bounds", fd >= 0 && fd < anfdmax));
 
-  /* io_uring is oneshot, so we need to re-arm the fd next iteration */
-  /* this also means we usually have to do at least one syscall per iteration */
-  anfds [fd].events = 0;
-  fd_change (EV_A_ fd, EV_ANFD_REIFY);
+    /* documentation lies, of course. the result value is NOT like
+     * normal syscalls, but like linux raw syscalls, i.e. negative
+     * error numbers. fortunate, as otherwise there would be no way
+     * to get error codes at all. still, why not document this?
+     */
+
+    /* ignore event if generation doesn't match */
+    /* other than skipping removal events, */
+    /* this should actually be very rare */
+    if (ecb_expect_false(gen != (uint32_t)anfds [fd].egen)) {
+        return;
+    }
+
+    if (ecb_expect_false(res < 0)) {
+        /*TODO: EINVAL handling (was something failed with this fd)*/
+
+        if (res == -EBADF) {
+            assert(("libev: event loop rejected bad fd", res != -EBADF));
+            fd_kill(EV_A_ fd);
+        } else {
+            errno = -res;
+            ev_syserr("(libev) IORING_OP_POLL_ADD");
+        }
+
+        return;
+    }
+
+    /* feed events, we do not expect or handle POLLNVAL */
+    fd_event(
+        EV_A_
+        fd,
+        (res & (POLLOUT | POLLERR | POLLHUP) ? EV_WRITE : 0)
+        | (res & (POLLIN | POLLERR | POLLHUP) ? EV_READ : 0)
+    );
+
+    /* io_uring is oneshot, so we need to re-arm the fd next iteration */
+    /* this also means we usually have to do at least one syscall per iteration */
+    anfds [fd].events = 0;
+    fd_change(EV_A_ fd, EV_ANFD_REIFY);
 }
 
 /* called when the event queue overflows */
 ecb_cold
 static void
-iouring_overflow (EV_P)
-{
-  /* we have two options, resize the queue (by tearing down
-   * everything and recreating it, or living with it
-   * and polling.
-   * we implement this by resizing the queue, and, if that fails,
-   * we just recreate the state on every failure, which
-   * kind of is a very inefficient poll.
-   * one danger is, due to the bios toward lower fds,
-   * we will only really get events for those, so
-   * maybe we need a poll() fallback, after all.
-   */
-  /*EV_CQ_VAR (overflow) = 0;*/ /* need to do this if we keep the state and poll manually */
+iouring_overflow(EV_P) {
+    /* we have two options, resize the queue (by tearing down
+     * everything and recreating it, or living with it
+     * and polling.
+     * we implement this by resizing the queue, and, if that fails,
+     * we just recreate the state on every failure, which
+     * kind of is a very inefficient poll.
+     * one danger is, due to the bios toward lower fds,
+     * we will only really get events for those, so
+     * maybe we need a poll() fallback, after all.
+     */
+    /*EV_CQ_VAR (overflow) = 0;*/ /* need to do this if we keep the state and poll manually */
 
-  fd_rearm_all (EV_A);
+    fd_rearm_all(EV_A);
 
-  /* we double the size until we hit the hard-to-probe maximum */
-  if (!iouring_max_entries)
-    {
-      iouring_entries <<= 1;
-      iouring_fork (EV_A);
-    }
-  else
-    {
-      /* we hit the kernel limit, we should fall back to something else.
-       * we can either poll() a few times and hope for the best,
-       * poll always, or switch to epoll.
-       * TODO: is this necessary with newer kernels?
-       */
+    /* we double the size until we hit the hard-to-probe maximum */
+    if (!iouring_max_entries) {
+        iouring_entries <<= 1;
+        iouring_fork(EV_A);
+    } else {
+        /* we hit the kernel limit, we should fall back to something else.
+         * we can either poll() a few times and hope for the best,
+         * poll always, or switch to epoll.
+         * TODO: is this necessary with newer kernels?
+         */
 
-      iouring_internal_destroy (EV_A);
+        iouring_internal_destroy(EV_A);
 
-      /* this should make it so that on return, we don't call any uring functions */
-      iouring_to_submit = 0;
+        /* this should make it so that on return, we don't call any uring functions */
+        iouring_to_submit = 0;
 
-      for (;;)
-        {
-          backend = epoll_init (EV_A_ 0);
+        for (;;) {
+            backend = epoll_init(EV_A_ 0);
 
-          if (backend)
-            break;
+            if (backend) {
+                break;
+            }
 
-          ev_syserr ("(libev) iouring switch to epoll");
+            ev_syserr("(libev) iouring switch to epoll");
         }
     }
 }
 
 /* handle any events in the completion queue, return true if there were any */
 static int
-iouring_handle_cq (EV_P)
-{
-  unsigned head, tail, mask;
-  
-  head = EV_CQ_VAR (head);
-  ECB_MEMORY_FENCE_ACQUIRE;
-  tail = EV_CQ_VAR (tail);
+iouring_handle_cq(EV_P) {
+    unsigned head, tail, mask;
 
-  if (head == tail)
-    return 0;
+    head = EV_CQ_VAR(head);
+    ECB_MEMORY_FENCE_ACQUIRE;
+    tail = EV_CQ_VAR(tail);
 
-  /* it can only overflow if we have events, yes, yes? */
-  if (ecb_expect_false (EV_CQ_VAR (overflow)))
-    {
-      iouring_overflow (EV_A);
-      return 1;
+    if (head == tail) {
+        return 0;
     }
 
-  mask = EV_CQ_VAR (ring_mask);
+    /* it can only overflow if we have events, yes, yes? */
+    if (ecb_expect_false(EV_CQ_VAR(overflow))) {
+        iouring_overflow(EV_A);
+        return 1;
+    }
 
-  do
-    iouring_process_cqe (EV_A_ &EV_CQES [head++ & mask]);
-  while (head != tail);
+    mask = EV_CQ_VAR(ring_mask);
 
-  EV_CQ_VAR (head) = head;
-  ECB_MEMORY_FENCE_RELEASE;
+    do {
+        iouring_process_cqe(EV_A_ & EV_CQES [head++ & mask]);
+    } while (head != tail);
 
-  return 1;
+    EV_CQ_VAR(head) = head;
+    ECB_MEMORY_FENCE_RELEASE;
+
+    return 1;
 }
 
 static void
-iouring_poll (EV_P_ ev_tstamp timeout)
-{
-  /* if we have events, no need for extra syscalls, but we might have to queue events */
-  /* we also clar the timeout if there are outstanding fdchanges */
-  /* the latter should only happen if both the sq and cq are full, most likely */
-  /* because we have a lot of event sources that immediately complete */
-  /* TODO: fdchacngecnt is always 0 because fd_reify does not have two buffers yet */
-  if (iouring_handle_cq (EV_A) || fdchangecnt)
-    timeout = EV_TS_CONST (0.);
-  else
-    /* no events, so maybe wait for some */
-    iouring_tfd_update (EV_A_ timeout);
-
-  /* only enter the kernel if we have something to submit, or we need to wait */
-  if (timeout || iouring_to_submit)
+iouring_poll(EV_P_ ev_tstamp timeout) {
+    /* if we have events, no need for extra syscalls, but we might have to queue events */
+    /* we also clar the timeout if there are outstanding fdchanges */
+    /* the latter should only happen if both the sq and cq are full, most likely */
+    /* because we have a lot of event sources that immediately complete */
+    /* TODO: fdchacngecnt is always 0 because fd_reify does not have two buffers yet */
+    if (iouring_handle_cq(EV_A) || fdchangecnt) {
+        timeout = EV_TS_CONST(0.);
+    } else
+        /* no events, so maybe wait for some */
     {
-      int res = iouring_enter (EV_A_ timeout);
+        iouring_tfd_update(EV_A_ timeout);
+    }
 
-      if (ecb_expect_false (res < 0))
-        if (errno == EINTR)
-          /* ignore */;
-        else if (errno == EBUSY)
-          /* cq full, cannot submit - should be rare because we flush the cq first, so simply ignore */;
-        else
-          ev_syserr ("(libev) iouring setup");
-      else
-        iouring_handle_cq (EV_A);
+    /* only enter the kernel if we have something to submit, or we need to wait */
+    if (timeout || iouring_to_submit) {
+        int res = iouring_enter(EV_A_ timeout);
+
+        if (ecb_expect_false(res < 0))
+            if (errno == EINTR)
+                /* ignore */;
+            else if (errno == EBUSY)
+                /* cq full, cannot submit - should be rare because we flush the cq first, so simply ignore */;
+            else {
+                ev_syserr("(libev) iouring setup");
+            } else {
+            iouring_handle_cq(EV_A);
+        }
     }
 }
 
 inline_size
 int
-iouring_init (EV_P_ int flags)
-{
-  iouring_entries     = IOURING_INIT_ENTRIES;
-  iouring_max_entries = 0;
+iouring_init(EV_P_ int flags) {
+    iouring_entries     = IOURING_INIT_ENTRIES;
+    iouring_max_entries = 0;
 
-  if (iouring_internal_init (EV_A) < 0)
-    {
-      iouring_internal_destroy (EV_A);
-      return 0;
+    if (iouring_internal_init(EV_A) < 0) {
+        iouring_internal_destroy(EV_A);
+        return 0;
     }
 
-  ev_io_init  (&iouring_tfd_w, iouring_tfd_cb, iouring_tfd, EV_READ);
-  ev_set_priority (&iouring_tfd_w, EV_MINPRI);
-  ev_io_start (EV_A_ &iouring_tfd_w);
-  ev_unref (EV_A); /* watcher should not keep loop alive */
+    ev_io_init(&iouring_tfd_w, iouring_tfd_cb, iouring_tfd, EV_READ);
+    ev_set_priority(&iouring_tfd_w, EV_MINPRI);
+    ev_io_start(EV_A_ & iouring_tfd_w);
+    ev_unref(EV_A);  /* watcher should not keep loop alive */
 
-  backend_modify = iouring_modify;
-  backend_poll   = iouring_poll;
+    backend_modify = iouring_modify;
+    backend_poll   = iouring_poll;
 
-  return EVBACKEND_IOURING;
+    return EVBACKEND_IOURING;
 }
 
 inline_size
 void
-iouring_destroy (EV_P)
-{
-  iouring_internal_destroy (EV_A);
+iouring_destroy(EV_P) {
+    iouring_internal_destroy(EV_A);
 }
 
